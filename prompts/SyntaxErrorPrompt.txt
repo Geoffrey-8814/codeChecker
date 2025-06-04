@@ -3,14 +3,14 @@ You need to identify all syntax errors, and find out which line each of them is 
 The output format should be a json object.
 
 EXAMPLE INPUT:
-1:def multiply(a, b)  
-2:    result = a * b
-3:    return result
-4:
-5:print(multiply(2, 3)  
-6:
-7:if 10 > 5  
-8:    print("True")
+def multiply(a, b)  
+    result = a * b
+    return result
+
+print(multiply(2, 3)  
+
+if 10 > 5  
+    print("True")
 
 EXAMPLE JSON OUTPUT:
 {
@@ -18,17 +18,18 @@ EXAMPLE JSON OUTPUT:
         {
             "errorType" : "syntax error",
             "range" : [1],
-            "advice": "Added : after the function definition."
+            "advice": "Add : after the function definition."
         },
         {
             "errorType" : "syntax error",
             "range" : [5],
-            "advice": "Completed the parentheses with )."
+            "advice": "Complete the parentheses with )."
         },
         {
             "errorType" : "syntax error",
             "range" : [7],
-            "advice": "Added : after the if condition."
+            "advice": "Add : after the if condition."
         }
-    ]
+    ],
+    "correction" : ""def multiply(a, b) : \n    result = a * b\n    return result\n\nprint(multiply(2, 3))\n\nif 10 > 5 : \n    print(\"True\")""
 }

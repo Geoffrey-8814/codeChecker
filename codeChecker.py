@@ -11,9 +11,13 @@ class codeChecker:
         self.base_dirc = "prompts/"
         self.syntaxErrorPrompt = self.readPrompt("SyntaxErrorPrompt" )
         self.runtimeErrorPrompt = self.readPrompt("RuntimeErrorPrompt")
+        self.logicalErrorPrompt = self.readPrompt("LogicalErrorPrompts")
+        
+        self.messages=[]
         
     def readPrompt(self, name):
         return open(self.base_dirc + name + ".txt").read()
+    
     def checkSyntaxError(self, input_code):
         system_prompt = self.syntaxErrorPrompt
         user_prompt = input_code
@@ -27,9 +31,7 @@ class codeChecker:
         return self.LLM.callDeepseekJsonWithCoT(system_prompt, user_prompt)
 
     def AlBasedLogicErrorDetection(self, input_code):
-        system_prompt = """
-        The user will provide some python code. Catch logic errors even when the code runs but produces incorrect results.
-        """
+        system_prompt = self.logicalErrorPrompt
         user_prompt = input_code
         
         return self.LLM.callDeepseekJsonWithCoT(system_prompt, user_prompt)
@@ -40,7 +42,23 @@ class codeChecker:
         """
         user_prompt = input_code
         
-        return self.LLM.callDeepseekJsonWithCoT(system_prompt, user_prompt)
+        return self.LLM.callDeepseek(system_prompt, user_prompt, None)
+    def setupConversation(self, inputCode, correction):
+        self.messages=[
+            {"role": "user", "content": "Can you debug this code for me?" + inputCode},
+            {"role": "assistant", "content": correction}
+        ]
+    def InteractiveDebugging(self, input):
+        system_prompt = """
+        You are an Interactive AI Debugging Assistant. Your job is to help users debug code by identifying syntax errors, runtime errors, and logical mistakes. When a user provides code, analyze it line by line, simulate its behavior mentally.
+        """
+        self.messages.append({"role": "user", "content": input})
+        
+        response = self.LLM.callDeepseek(system_prompt, None, self.messages)
+        
+        self.messages.append({"role": "assistant", "content": response})
+        
+        return response
 
 if __name__ == "__main__":
     checker = codeChecker("sk-a20fe5cabaac4bcda4af0347d3ad5038", "https://api.deepseek.com")

@@ -52,5 +52,7 @@ EXAMPLE JSON OUTPUT:
             "range" : [19],
             "advice": "Correct the variable name spelling."
         }
-    ]
+    ],
+    "correction": "def calculate_stats(data):\n    if len(data) == 0:\n        return {\"total\": 0, \"avg\": 0}\n    total = sum(data)\n    average = total / len(data)\n    return {\"total\": total, \"avg\": average}\n\ndef process_user(user):\n    name = user.get(\"name\", \"\")\n    surname = user.get(\"surname\", \"\")\n    user[\"full_name\"] = name + \" \" + surname\n    user[\"age_next_year\"] = user.get(\"age\", 0) + 1\n    return user\n\ndef load_config():\n    config = {\"timeout\": 30, \"retries\": 3}\n    return config.get(\"retry_count\", 0)\n\ndef main():\n    stats = calculate_stats([])\n    print(stats)\n\n    user = {\"name\": \"Alice\"}\n    processed_user = process_user(user)\n    print(processed_user)\n\n    config_value = load_config()\n    print(config_value)\n\n    value = \"123\"\n    result = int(value) + 5\n    print(result)\n\nif __name__ == \"__main__\":\n    main()"
+
 }

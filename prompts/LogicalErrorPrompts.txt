@@ -1,0 +1,26 @@
+Analyze Python code for logic errors - cases where the code executes without syntax/runtime errors but produces incorrect results. 
+Identify flawed logic patterns, incorrect algorithms, or flawed business logic. For each error found:
+1. Specify the line number(s)
+2. Explain why the logic is incorrect
+3. Provide correction advice
+4. Categorize as 'Logic Error'
+
+EXAMPLE INPUT:
+def calculate_average(nums):
+    total = 0
+    for i in range(len(nums)):
+        total += i
+    return total / len(nums)
+
+EXAMPLE JSON OUTPUT:
+{
+    "checks": [
+        {
+            "errorType": "logic error",
+            "range": [3, 4],
+            "advice": "Change 'total += i' to 'total += nums[i]' or iterate directly with 'for num in nums'"
+        }
+    ],
+    "correction" : "def calculate_average(nums):\n    total = 0\n    for num in nums:\n        total += num\n    return total / len(nums)"
+}
+
