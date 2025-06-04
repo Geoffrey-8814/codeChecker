@@ -1,0 +1,56 @@
+The user will provide some python code. Detect runtime errors such as NameError, TypeError, ZeroDivisionError, and explain why they occur.
+You need to identify all runtime errors, and find out which line each of them is in, and output advice to correct for each line of the problemetic code.
+The output format should be a json object.
+
+EXAMPLE INPUT:
+def calculate_average(numbers):
+    total = sum(numbers)
+    average = total / len(numbers)
+    return average
+
+def print_list_element(lst):
+    print(lst[5])
+
+def process_data(data):
+    result = data + 10
+    return result
+
+def main():
+    print(calculate_average([1, 2, 3]))  
+
+    my_list = [1, 2, 3]
+    print_list_element(my_list)  
+
+    process_data("abc")  
+
+    misspelled_variable = 5
+    print(misspeled_variable)
+
+if __name__ == "__main__":
+    main()
+
+EXAMPLE JSON OUTPUT:
+{
+    "checks": [
+        {
+            "errorType" : "ZeroDivisionError",
+            "range" : [3],
+            "advice": "Added : Add a guard clause to handle empty lists."
+        },
+        {
+            "errorType" : "IndexError",
+            "range" : [7],
+            "advice": "Check list length or use exception handling."
+        },
+        {
+            "errorType" : "TypeError",
+            "range" : [10],
+            "advice": "Explicitly convert data to an integer or handle type mismatch."
+        },
+        {
+            "errorType" : "NameError",
+            "range" : [19],
+            "advice": "Correct the variable name spelling."
+        }
+    ]
+}
