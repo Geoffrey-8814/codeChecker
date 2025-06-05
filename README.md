@@ -4,7 +4,7 @@ app: https://wlsacodechecker.streamlit.app
 
 
 ## Overview
-Interactive AI Debugger is a powerful web application that helps developers analyze and debug Python code using AI-powered analysis. The tool detects syntax errors, runtime exceptions, logical mistakes, and style violations while providing explanations and interactive debugging support.
+This code checker is a powerful web application that helps developers analyze and debug Python code using AI-powered analysis. The tool detects syntax errors, runtime exceptions, logical mistakes, and style violations while providing explanations and interactive debugging support based on prompt engineering of DeepSeek API.
 
 ## Features
 - **Multi-mode Analysis**:
@@ -22,12 +22,17 @@ Interactive AI Debugger is a powerful web application that helps developers anal
 - **AI-Powered Insights**:
   - Detailed error explanations
   - Correction suggestions
+  - Error Categorization
   - Code improvement recommendations
   - Interactive Q&A debugging
 
 - **User-Friendly Interface**:
   - Conversation history tracking
   - Color-coded error highlighting
-  - Clean separation of user/bot messages
   - Status indicators for long-running operations
 
+- **Acknowledgements**:
+  - Powered by DeepSeek AI Models
+  - Built with Streamlit framework
+  - Inspired by Python educators worldwide
+  - Special thanks to our beta testers and contributors
