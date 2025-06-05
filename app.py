@@ -95,6 +95,7 @@ try:
     lastRole = None
     for message in st.session_state.history:
         if lastRole !=message["role"]:
+            st.markdown("---")
             st.markdown(":blue[user:]" if message["role"] == "user" else ":green[bot:]")
         lastRole = message["role"]
         content = message["content"]

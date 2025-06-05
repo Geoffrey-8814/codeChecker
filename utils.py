@@ -18,7 +18,7 @@ class LLM_Util:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
         ] if messages == None else messages,
-            max_tokens=512,
+            max_tokens=1024,
             response_format= {'type': 'json_object' if isJSON else 'text'},
             stream=False
         )
