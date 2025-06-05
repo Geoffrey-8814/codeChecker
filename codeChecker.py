@@ -14,6 +14,7 @@ class codeChecker:
         self.logicalErrorPrompt = self.readPrompt("LogicalErrorPrompts")
         
         self.messages=[]
+        print("init")
         
     def readPrompt(self, name):
         return open(self.base_dirc + name + ".txt").read()
@@ -45,18 +46,20 @@ class codeChecker:
         return self.LLM.callDeepseek(system_prompt, user_prompt, None)
     def setupConversation(self, inputCode, correction):
         self.messages=[
-            {"role": "user", "content": "Can you debug this code for me?" + inputCode},
+            {"role": "user", "content": "Debug this code: " + inputCode},
             {"role": "assistant", "content": correction}
         ]
     def InteractiveDebugging(self, input):
         system_prompt = """
         You are an Interactive AI Debugging Assistant. Your job is to help users debug code by identifying syntax errors, runtime errors, and logical mistakes. When a user provides code, analyze it line by line, simulate its behavior mentally.
         """
+        
         self.messages.append({"role": "user", "content": input})
         
         response = self.LLM.callDeepseek(system_prompt, None, self.messages)
         
         self.messages.append({"role": "assistant", "content": response})
+        
         
         return response
 

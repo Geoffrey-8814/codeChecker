@@ -1,77 +1,86 @@
+from io import StringIO
 import streamlit as st
 import json
 
-st.set_page_config(page_title="Interactive AI Debugger", layout="wide")
-st.title("🧠 Interactive AI Code Debugger")
+from codeChecker import codeChecker
 
-# Session state to hold conversation history
-if "history" not in st.session_state:
-    st.session_state.history = []
+if __name__ == "__main__":
+    checker = codeChecker("sk-a20fe5cabaac4bcda4af0347d3ad5038", "https://api.deepseek.com")
+    
 
-# --- Dummy AI Debugger Function (Replace with OpenAI or other backend) ---
-def debug_code(code: str):
-    # Simulated example with hardcoded logic errors
-    if "total += i" in code:
-        correction = code.replace("total += i", "total += nums[i]")  # or total += num if rewritten
-        return {
-            "checks": [
-                {
-                    "errorType": "logic error",
-                    "range": [3, 4],
-                    "advice": "Change 'total += i' to 'total += nums[i]' or iterate directly with 'for num in nums'"
-                }
-            ],
-            "correction": correction
-        }
-    elif "user.age" in code:
-        correction = code.replace("user.age", "user.get(\"age\", 0)")
-        return {
-            "checks": [
-                {
-                    "errorType": "runtime error",
-                    "range": [6],
-                    "advice": "Use user.get(\"age\", 0) instead of accessing attribute 'age'"
-                }
-            ],
-            "correction": correction
-        }
-    else:
-        return {
-            "checks": [],
-            "correction": code
-        }
+# Title of the app
+st.title("code checker")
+if "chat" not in st.session_state:
+    st.session_state.chat = []
+    
+# Text input
+st.text("\n input your code:")
+code = st.text_area("", height=300)
 
-# --- UI ---
-st.subheader("Paste your Python code below")
-user_code = st.text_area("Python Code", height=300)
+uploaded_file = st.file_uploader("upload file")
+if uploaded_file is not None:
+    # To read file as bytes:
+    bytes_data = uploaded_file.getvalue()
+    st.write(bytes_data)
 
-if st.button("🔍 Debug"):
-    if user_code.strip():
-        result = debug_code(user_code)
-        st.session_state.history.append({"input": user_code, "output": result})
-    else:
-        st.warning("Please paste some code first.")
+    # To convert to a string based IO:
+    stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+    code = stringio.read()
 
-# Show history (multi-round)
-for i, step in enumerate(st.session_state.history):
-    with st.expander(f"🧪 Debug Round {i + 1}", expanded=(i == len(st.session_state.history) - 1)):
-        st.subheader("🔢 Input Code")
-        st.code(step["input"], language="python")
+#display input code
+st.text("your code:")
+st.code(code)
 
-        if step["output"]["checks"]:
-            st.subheader("⚠️ Detected Issues")
-            for check in step["output"]["checks"]:
-                st.markdown(f"""
-                **Error Type**: `{check["errorType"]}`  
-                **Line(s)**: `{check["range"]}`  
-                **Advice**: {check["advice"]}
-                """)
-        else:
-            st.success("✅ No issues detected.")
+errorType = st.segmented_control("error type", ["runtime", "syntax", "logical"], default="syntax")
 
-        st.subheader("✅ Suggested Correction")
-        st.code(step["output"]["correction"], language="python")
+st.write("checking for " + errorType)
 
-        if st.button("Use this corrected code", key=f"use_{i}"):
-            st.session_state.history.append({"input": step["output"]["correction"], "output": debug_code(step["output"]["correction"])})
+response = ""
+#start debugging if the code isn't empty
+if st.button("check") and code != "":
+    with st.status("error analyzing..."):
+        match errorType:
+            case "runtime":
+                response = checker.checkCommonRuntimeError(code)
+            case "syntax":
+                response = checker.checkSyntaxError(code) 
+            case "logical":
+                response = checker.AlBasedLogicErrorDetection(code)   
+        
+    response = json.loads(response)
+    lines = code.splitlines()
+    checks = response["checks"]
+    for check in checks:
+        if len(check) != 3:
+            continue
+        index = check["range"][0]
+        st.code(f"{index}: " + lines[index - 1])
+        advice = check["advice"]
+        errorType = check["errorType"]
+        st.markdown(f":red[{errorType}!] :orange[advice:] :green[{advice}]")
+        
+    
+    st.text("correction:")
+    correctedCode = response["correction"]
+    st.code(correctedCode)
+    
+    with st.status("generating explanations..."):
+        response = checker.lineByLineAIExplanation(correctedCode)
+        st.markdown(response)
+    
+    checker.setupConversation(code, correctedCode)
+    user_input = st.text_input("You:", key="user_input")
 
+    if st.button("Send"):
+        if user_input.strip():
+            # Add user message
+            st.session_state.chat.append(("You", user_input))
+            with st.status("generating response..."):
+                response = checker.InteractiveDebugging(user_input)
+
+            # Add bot response
+            st.session_state.chat.append(("Bot", response))
+
+        # Display chat
+        for speaker, message in st.session_state.chat:
+            st.markdown(f"**{speaker}:** {message}")
