@@ -6,7 +6,7 @@ from codeChecker import codeChecker
 
 
 st.set_page_config(page_title="Interactive AI Debugger", layout="wide")
-st.title("test chat")
+st.title("code checker")
 
 # Session state to hold conversation history
 if "history" not in st.session_state:
