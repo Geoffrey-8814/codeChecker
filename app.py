@@ -1,6 +1,7 @@
 from io import StringIO
 import streamlit as st
 import json
+import difflib
 
 from codeChecker import codeChecker
 
@@ -28,6 +29,31 @@ def readFile(uploaded_file):
     # To convert to a string based IO:
     stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
     return stringio.read()
+
+def generate_html_diff(user_code: str, corrected_code: str, highlight_lines: list[int]) -> str:
+    user_lines = user_code.splitlines()
+    corrected_lines = corrected_code.splitlines()
+
+    max_len = max(len(user_lines), len(corrected_lines))
+    user_lines += [""] * (max_len - len(user_lines))
+    corrected_lines += [""] * (max_len - len(corrected_lines))
+
+    html = "<div style='display: flex;'>"
+
+    left_html = "<div style='flex: 1; padding: 10px; background-color: #f8f8f8;'><h4>User Code</h4><pre style='line-height: 1.4;'>"
+    right_html = "<div style='flex: 1; padding: 10px; background-color: #f0fff0;'><h4>Corrected Code</h4><pre style='line-height: 1.4;'>"
+
+    for i, (u, c) in enumerate(zip(user_lines, corrected_lines), start=1):
+        highlight_style = "background-color: #fff8b3;" if i in highlight_lines else ""
+        left_html += f"<span style='{highlight_style}'>{u}</span>\n"
+        right_html += f"<span style='{highlight_style}'>{c}</span>\n"
+
+    left_html += "</pre></div>"
+    right_html += "</pre></div>"
+    html += left_html + right_html + "</div>"
+
+    return html
+
 
 # select mode
 mode = st.segmented_control("mode: ", ["runtime", "syntax", "logical", "style", "explanation", "chat"], default="chat")
@@ -82,9 +108,11 @@ try:
                 response = json.loads(response)
                 lines = code.splitlines()
                 checks = response["checks"]
+                changedLines = []
                 for check in checks:
                     if len(check) != 3:
                         continue
+                    changedLines.append(check["range"])
                     index = check["range"][0]
                     st.session_state.history.append({"role" : "bot", "format" : "code", "content" : f"{index}: " + lines[index - 1]})
                     advice = check["advice"]
@@ -94,7 +122,12 @@ try:
                 st.session_state.history.append({"role" : "bot", "format" : "text", "content" : "correction:"})
 
                 correctedCode = response["correction"]
-                st.session_state.history.append({"role" : "bot", "format" : "code", "content" : correctedCode})
+                
+                changedLines = list(set(item for sublist in changedLines for item in sublist))
+
+                html = generate_html_diff(code, correctedCode, changedLines)
+                
+                st.session_state.history.append({"role" : "bot", "format" : "html", "content" : html})
                 
                 checker.setupConversation(code, correctedCode)
     
@@ -108,9 +141,11 @@ try:
         content = message["content"]
         match message["format"]:
             case "code":
-                st.code(f"{content}")
+                st.code(content)
             case "text":
-                st.markdown(f"{content}")
+                st.markdown(content)
+            case "html":
+                st.components.v1.html(content, height=400, scrolling=True)
 except:
     # make sure that no error won't crush the code
     st.markdown(":red[The server is busy. Please try again later.]")
