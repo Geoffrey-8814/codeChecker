@@ -29,7 +29,7 @@ def readFile(uploaded_file):
     stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
     return stringio.read()
 
-mode = st.segmented_control("error type", ["runtime", "syntax", "logical", "explanation", "chat"], default="chat")
+mode = st.segmented_control("mode: ", ["runtime", "syntax", "logical", "style", "explanation", "chat"], default="chat")
 
 prompt = st.chat_input(
     "Say something and/or attach an file",
@@ -62,6 +62,9 @@ if newPrompt:
                 isJson = True
             case "logical":
                 response = checker.AlBasedLogicErrorDetection(code)
+                isJson = True
+            case "style":
+                response = checker.checkStyleViolation(code)
                 isJson = True
             case "explanation":
                 response = checker.lineByLineAIExplanation(code)

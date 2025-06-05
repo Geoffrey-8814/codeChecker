@@ -1,0 +1,41 @@
+Analyze the following Python code for style violations according to PEP8, the official Python style guide. Do NOT report syntax or logic errors.
+
+For each violation:
+1. Specify the line number(s)
+2. Explain the style issue
+3. Provide correction advice
+4. Categorize the issue as "style violation"
+
+Return the result in JSON format:
+
+EXAMPLE INPUT:
+def MyFunction(x,y):
+ a= x+y
+ return a
+
+EXAMPLE OUTPUT:
+{
+  "checks": [
+    {
+      "errorType": "style violation",
+      "range": [1],
+      "advice": "Function name 'MyFunction' should use lowercase with underscores: 'my_function'"
+    },
+    {
+      "errorType": "style violation",
+      "range": [1],
+      "advice": "Add space after each comma in function arguments: 'x, y'"
+    },
+    {
+      "errorType": "style violation",
+      "range": [2],
+      "advice": "Use 4 spaces for indentation"
+    },
+    {
+      "errorType": "style violation",
+      "range": [2],
+      "advice": "Add spaces around operators: 'a = x + y'"
+    }
+  ],
+  "correction": "def my_function(x, y):\n    a = x + y\n    return a"
+}

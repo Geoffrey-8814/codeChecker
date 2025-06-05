@@ -11,7 +11,8 @@ class codeChecker:
         self.base_dirc = "prompts/"
         self.syntaxErrorPrompt = self.readPrompt("SyntaxErrorPrompt" )
         self.runtimeErrorPrompt = self.readPrompt("RuntimeErrorPrompt")
-        self.logicalErrorPrompt = self.readPrompt("LogicalErrorPrompts")
+        self.logicalErrorPrompt = self.readPrompt("LogicalErrorPrompt")
+        self.styleViolationPrompt = self.readPrompt("StyleViolationPrompt")
         
         self.messages=[]
         print("init")
@@ -62,6 +63,11 @@ class codeChecker:
         
         
         return response
+    def checkStyleViolation(self, input_code):
+        system_prompt = self.styleViolationPrompt
+        user_prompt = input_code
+        
+        return self.LLM.callDeepseekJson(system_prompt, user_prompt)
 
 if __name__ == "__main__":
     checker = codeChecker("sk-a20fe5cabaac4bcda4af0347d3ad5038", "https://api.deepseek.com")
