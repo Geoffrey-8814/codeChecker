@@ -9,6 +9,7 @@ class codeChecker:
         self.LLM = LLM_Util(api_key, base_url)
         
         self.base_dirc = "prompts/"
+        
         self.syntaxErrorPrompt = self.readPrompt("SyntaxErrorPrompt" )
         self.runtimeErrorPrompt = self.readPrompt("RuntimeErrorPrompt")
         self.logicalErrorPrompt = self.readPrompt("LogicalErrorPrompt")
