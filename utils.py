@@ -9,7 +9,7 @@ class LLM_Util:
         self.api_key = api_key
         self.base_url = base_url
     
-    def createResponse(self, isReasoner: bool, system_prompt: bool, user_prompt: bool = None, isJSON: bool = False, messages = None):
+    def createResponse(self, isReasoner: bool, system_prompt: str, user_prompt: str = None, isJSON: bool = False, messages = None):
         client = OpenAI(api_key=self.api_key, base_url=self.base_url)
         
         response = client.chat.completions.create(
@@ -17,7 +17,7 @@ class LLM_Util:
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
-        ] if messages == None else messages,
+        ] if messages == None else [{"role": "system", "content": system_prompt}] + messages,
             max_tokens=1024,
             response_format= {'type': 'json_object' if isJSON else 'text'},
             stream=False
