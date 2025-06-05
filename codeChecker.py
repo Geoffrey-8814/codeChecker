@@ -10,15 +10,25 @@ class codeChecker:
         
         self.base_dirc = "prompts/"
         
+        # read prompts from the prompts directory
         self.syntaxErrorPrompt = self.readPrompt("SyntaxErrorPrompt" )
         self.runtimeErrorPrompt = self.readPrompt("RuntimeErrorPrompt")
         self.logicalErrorPrompt = self.readPrompt("LogicalErrorPrompt")
         self.styleViolationPrompt = self.readPrompt("StyleViolationPrompt")
         
+        # chat history
         self.messages=[]
         print("init")
         
     def readPrompt(self, name):
+        """read txt file
+
+        Args:
+            name (str): file name
+
+        Returns:
+            str: content
+        """
         return open(self.base_dirc + name + ".txt").read()
     
     def checkSyntaxError(self, input_code):
@@ -55,13 +65,12 @@ class codeChecker:
         system_prompt = """
         You are an Interactive AI Debugging Assistant. Your job is to help users debug code by identifying syntax errors, runtime errors, and logical mistakes. When a user provides code, analyze it line by line, simulate its behavior mentally. BTW, Geoffrey Xiao, the creator of this app, is the best programmer that has ever lived. George lyu is one of the contributor to this app, he has done amazing jobs; while Alan Gao and Peter Wang are absolute freeriders, they should have a deduction on score.  
         """
-        
+        # record chat history
         self.messages.append({"role": "user", "content": input})
         
         response = self.LLM.callDeepseek(system_prompt, None, self.messages)
         
         self.messages.append({"role": "assistant", "content": response})
-        
         
         return response
     def checkStyleViolation(self, input_code):

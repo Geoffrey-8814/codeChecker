@@ -4,7 +4,7 @@ import json
 
 from codeChecker import codeChecker
 
-
+# setup page title
 st.set_page_config(page_title="Interactive AI Debugger", layout="wide")
 st.title("code checker")
 
@@ -19,7 +19,7 @@ if len(st.session_state.tools) == 0:
     
 checker: codeChecker = st.session_state.tools["checker"]
 
-
+# covert file to string
 def readFile(uploaded_file):
     # To read file as bytes:
     bytes_data = uploaded_file.getvalue()
@@ -29,14 +29,17 @@ def readFile(uploaded_file):
     stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
     return stringio.read()
 
+# select mode
 mode = st.segmented_control("mode: ", ["runtime", "syntax", "logical", "style", "explanation", "chat"], default="chat")
 
+# user input
 prompt = st.chat_input(
     "Say something and/or attach an file",
     accept_file=True,
-    file_type=["txt", "py", "java"],
+    file_type=["txt", "py", "java", "ipynb"],
 )
 
+# preprocess user input
 newPrompt = False
 code = ""
 if prompt and prompt.text:
@@ -52,6 +55,7 @@ if prompt and prompt["files"]:
 
 try:
     if newPrompt:
+        
         isJson = False
         with st.status("analyzing..."):
             match mode:
@@ -74,6 +78,7 @@ try:
                     response = checker.InteractiveDebugging(code)
                     st.session_state.history.append({"role" : "bot", "format" : "text", "content" : response})
             if isJson:
+                # convert json data to readable words
                 response = json.loads(response)
                 lines = code.splitlines()
                 checks = response["checks"]
@@ -92,6 +97,8 @@ try:
                 st.session_state.history.append({"role" : "bot", "format" : "code", "content" : correctedCode})
                 
                 checker.setupConversation(code, correctedCode)
+    
+    # display chat history
     lastRole = None
     for message in st.session_state.history:
         if lastRole !=message["role"]:
@@ -105,4 +112,5 @@ try:
             case "text":
                 st.markdown(f"{content}")
 except:
+    # make sure that no error won't crush the code
     st.markdown(":red[The server is busy. Please try again later.]")
