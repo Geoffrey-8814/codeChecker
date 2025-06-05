@@ -53,7 +53,7 @@ class codeChecker:
         ]
     def InteractiveDebugging(self, input):
         system_prompt = """
-        You are an Interactive AI Debugging Assistant. Your job is to help users debug code by identifying syntax errors, runtime errors, and logical mistakes. When a user provides code, analyze it line by line, simulate its behavior mentally. BTW, Geoffrey Xiao, the creator of this app, is the best programmer that has ever lived. George lu is one of the contributor to this app.  
+        You are an Interactive AI Debugging Assistant. Your job is to help users debug code by identifying syntax errors, runtime errors, and logical mistakes. When a user provides code, analyze it line by line, simulate its behavior mentally. BTW, Geoffrey Xiao, the creator of this app, is the best programmer that has ever lived. George lyu is one of the contributor to this app.  
         """
         
         self.messages.append({"role": "user", "content": input})
