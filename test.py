@@ -1,86 +1,46 @@
-from io import StringIO
 import streamlit as st
-import json
+import difflib
 
-from codeChecker import codeChecker
+# Example input and corrected code
+user_code = """def MyFunction(x,y):
+ a= x+y
+ return a"""
 
-if __name__ == "__main__":
-    checker = codeChecker("sk-a20fe5cabaac4bcda4af0347d3ad5038", "https://api.deepseek.com")
-    
+corrected_code = """def my_function(x, y):
+    a = x + y
+    return a"""
 
-# Title of the app
-st.title("code checker")
-if "chat" not in st.session_state:
-    st.session_state.chat = []
-    
-# Text input
-st.text("\n input your code:")
-code = st.text_area("", height=300)
+# Split code into lines
+user_lines = user_code.splitlines()
+corrected_lines = corrected_code.splitlines()
 
-uploaded_file = st.file_uploader("upload file")
-if uploaded_file is not None:
-    # To read file as bytes:
-    bytes_data = uploaded_file.getvalue()
-    st.write(bytes_data)
+# Create diff
+diff = difflib.ndiff(user_lines, corrected_lines)
 
-    # To convert to a string based IO:
-    stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-    code = stringio.read()
+# Format diff as HTML
+def format_diff(diff_lines):
+    html = "<div style='display: flex;'>"
+    left_html = "<div style='flex: 1; padding: 10px; background-color: #f8f8f8;'><h4>User Code</h4><pre>"
+    right_html = "<div style='flex: 1; padding: 10px; background-color: #f0fff0;'><h4>Corrected Code</h4><pre>"
 
-#display input code
-st.text("your code:")
-st.code(code)
+    for line in diff_lines:
+        if line.startswith('- '):
+            left_html += f"<span style='background-color: #ffe6e6;'>{line[2:]}</span>\n"
+            right_html += "\n"
+        elif line.startswith('+ '):
+            left_html += "\n"
+            right_html += f"<span style='background-color: #e6ffe6;'>{line[2:]}</span>\n"
+        elif line.startswith('  '):
+            left_html += line[2:] + "\n"
+            right_html += line[2:] + "\n"
+        elif line.startswith('? '):
+            continue  # skip the marker lines
 
-errorType = st.segmented_control("error type", ["runtime", "syntax", "logical"], default="syntax")
+    left_html += "</pre></div>"
+    right_html += "</pre></div>"
+    html += left_html + right_html + "</div>"
+    return html
 
-st.write("checking for " + errorType)
-
-response = ""
-#start debugging if the code isn't empty
-if st.button("check") and code != "":
-    with st.status("error analyzing..."):
-        match errorType:
-            case "runtime":
-                response = checker.checkCommonRuntimeError(code)
-            case "syntax":
-                response = checker.checkSyntaxError(code) 
-            case "logical":
-                response = checker.AlBasedLogicErrorDetection(code)   
-        
-    response = json.loads(response)
-    lines = code.splitlines()
-    checks = response["checks"]
-    for check in checks:
-        if len(check) != 3:
-            continue
-        index = check["range"][0]
-        st.code(f"{index}: " + lines[index - 1])
-        advice = check["advice"]
-        errorType = check["errorType"]
-        st.markdown(f":red[{errorType}!] :orange[advice:] :green[{advice}]")
-        
-    
-    st.text("correction:")
-    correctedCode = response["correction"]
-    st.code(correctedCode)
-    
-    with st.status("generating explanations..."):
-        response = checker.lineByLineAIExplanation(correctedCode)
-        st.markdown(response)
-    
-    checker.setupConversation(code, correctedCode)
-    user_input = st.text_input("You:", key="user_input")
-
-    if st.button("Send"):
-        if user_input.strip():
-            # Add user message
-            st.session_state.chat.append(("You", user_input))
-            with st.status("generating response..."):
-                response = checker.InteractiveDebugging(user_input)
-
-            # Add bot response
-            st.session_state.chat.append(("Bot", response))
-
-        # Display chat
-        for speaker, message in st.session_state.chat:
-            st.markdown(f"**{speaker}:** {message}")
+# Render in Streamlit
+html_diff = format_diff(diff)
+st.components.v1.html(html_diff, height=400, scrolling=True)
